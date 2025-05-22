@@ -3,18 +3,25 @@ import Header from './components/Header';
 import CategorySelector from './components/CategorySelector';
 import VideoGrid from './components/VideoGrid';
 import PlaylistModal from './components/PlaylistModal';
-import { videos } from './data/videos';
+import { videos as allVideos } from './data/videos';
 import './App.css';
 
-const categories = ['All', 'Education', 'Travel', 'Music', 'Gaming', 'News'];
+const categories = ['All', 'Education', 'Travel', 'Music', 'Gaming', 'News', 'Sports'];
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showPlaylist, setShowPlaylist] = useState(false);
+  const [playlist, setPlaylist] = useState([]);
 
-  const filtered = selectedCategory === 'All'
-    ? videos
-    : videos.filter(v => v.category === selectedCategory);
+  const filteredVideos = selectedCategory === 'All'
+    ? allVideos
+    : allVideos.filter(video => video.category === selectedCategory);
+
+  const handleAddToPlaylist = (video) => {
+    if (!playlist.some(v => v.id === video.id)) {
+      setPlaylist([...playlist, video]);
+    }
+  };
 
   return (
     <div className="app-container">
@@ -24,8 +31,16 @@ function App() {
         selected={selectedCategory}
         onSelect={setSelectedCategory}
       />
-      <VideoGrid videos={filtered} />
-      {showPlaylist && <PlaylistModal onClose={() => setShowPlaylist(false)} />}
+      <VideoGrid
+        videos={filteredVideos}
+        onAddToPlaylist={handleAddToPlaylist}
+      />
+      {showPlaylist && (
+        <PlaylistModal
+          playlist={playlist}
+          onClose={() => setShowPlaylist(false)}
+        />
+      )}
     </div>
   );
 }
