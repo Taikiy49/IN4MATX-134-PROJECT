@@ -1,11 +1,14 @@
+// Header.jsx
 import React from 'react';
 import './Header.css';
 
 function Header({ onOpenPlaylist }) {
   return (
     <header className="header">
-      <h1>reTune</h1>
-      <button onClick={onOpenPlaylist}>Playlist</button>
+      <div className="header-title">ReTune</div>
+      <div className="header-right">
+        <button onClick={onOpenPlaylist} className="playlist-button">Playlist</button>
+      </div>
     </header>
   );
 }

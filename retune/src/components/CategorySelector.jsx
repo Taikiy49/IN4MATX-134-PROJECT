@@ -1,19 +1,20 @@
+// CategorySelector.jsx
 import React from 'react';
 import './CategorySelector.css';
 
 function CategorySelector({ categories, selected, onSelect }) {
   return (
-    <nav className="category-selector">
-      {categories.map(cat => (
+    <div className="category-selector">
+      {categories.map(category => (
         <button
-          key={cat}
-          className={cat === selected ? 'active' : ''}
-          onClick={() => onSelect(cat)}
+          key={category}
+          className={`category-button ${selected === category ? 'selected' : ''}`}
+          onClick={() => onSelect(category)}
         >
-          {cat}
+          {category}
         </button>
       ))}
-    </nav>
+    </div>
   );
 }
 

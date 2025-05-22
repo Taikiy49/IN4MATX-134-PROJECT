@@ -1,8 +1,35 @@
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
-  padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 1rem 2vw;
+  background-color: #141414;
+  color: white;
+  border-bottom: 1px solid #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.playlist-button {
+  padding: 0.5rem 1rem;
+  background-color: #222;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.playlist-button:hover {
+  background-color: #333;
 }
