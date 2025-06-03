@@ -1,0 +1,43 @@
+.settings-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.settings-modal {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  width: 300px;
+}
+
+.settings-modal h2 {
+  margin-bottom: 12px;
+}
+
+.settings-modal label {
+  display: flex;
+  flex-direction: column;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.settings-modal input[type='range'] {
+  margin-top: 8px;
+}
+
+.close-button {
+  background: #444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
