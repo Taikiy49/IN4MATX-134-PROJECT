@@ -3,48 +3,56 @@ import Header from './components/Header';
 import CategorySelector from './components/CategorySelector';
 import VideoGrid from './components/VideoGrid';
 import CategoryPickerModal from './components/CategoryPickerModal';
+import Settings from './components/Settings';
 import './App.css';
 
-// this label fetches popular videos on Youtube
+// this label fetches popular videos on YouTube
 const searchCategoryLabel = 'Discover';
 
 function App() {
-  // active category
   const [selectedCategory, setSelectedCategory] = useState(searchCategoryLabel);
-
-  // user created categories (initially empty)
   const [customCategories, setCustomCategories] = useState([]);
-
-  // mapping from each custom category -> array of saved videos
-  // video object shape: { id, title, thumbnail, channel, category }
   const [categoryVideos, setCategoryVideos] = useState({});
-
-  // array of videos to display in the grid
   const [videos, setVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // state for the "Add to Category" modal
+  // for accessibility slider
+  const [showSettings, setShowSettings] = useState(false);
+  const [accessibilityLevel, setAccessibilityLevel] = useState(1);
+
+  // for search input
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // for "Add to Category" modal
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [videoToCategorize, setVideoToCategorize] = useState(null);
 
-  // build YouTube search URL (only used if selectedCategory === "Discover")
+  // Whenever accessibilityLevel changes, adjust root font size
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      '--base-font-size',
+      `${16 * accessibilityLevel}px`
+    );
+  }, [accessibilityLevel]);
+
+  // Build YouTube search URL (used when selectedCategory === "Discover")
   const buildYouTubeURL = () => {
     const baseURL = 'https://www.googleapis.com/youtube/v3/search';
     const key = process.env.REACT_APP_YOUTUBE_API_KEY;
+    const q = searchQuery.trim() || 'popular videos';
     const params = new URLSearchParams({
       part: 'snippet',
       maxResults: 20,
       type: 'video',
       key,
-      q: 'popular videos',
+      q,
     });
     return `${baseURL}?${params.toString()}`;
   };
 
-  // whenever selectedCategory changes, update "videos"
+  // Fetch videos or load saved category videos whenever selectedCategory or searchQuery changes
   useEffect(() => {
-    // if "Discover", fetch popular videos from YouTube
     if (selectedCategory === searchCategoryLabel) {
       const fetchVideos = async () => {
         setIsLoading(true);
@@ -65,33 +73,28 @@ function App() {
         } catch (err) {
           console.error(err);
           setError(err.message);
+          setVideos([]);
         } finally {
           setIsLoading(false);
         }
       };
       fetchVideos();
-    }
-    // else, if it’s a custom category, show saved videos
-    else if (customCategories.includes(selectedCategory)) {
+    } else if (customCategories.includes(selectedCategory)) {
       const saved = categoryVideos[selectedCategory] || [];
       setVideos(saved);
-    }
-    // otherwise, clear the grid
-    else {
+    } else {
       setVideos([]);
     }
-  }, [selectedCategory, customCategories, categoryVideos]);
+  }, [selectedCategory, customCategories, categoryVideos, searchQuery]);
 
-  // create a new custom category via prompt
+  // Create a new custom category via prompt
   const handleAddCustomCategory = () => {
     const newName = prompt('Enter a name for your new category:');
     if (!newName) return;
-
     if (newName === searchCategoryLabel || customCategories.includes(newName)) {
       alert('That category already exists.');
       return;
     }
-
     setCustomCategories((prev) => [...prev, newName]);
     setCategoryVideos((prev) => ({
       ...prev,
@@ -99,13 +102,31 @@ function App() {
     }));
   };
 
-  // user clicked "+ Add to Category" on a video card
+  // Delete an existing custom category
+  const handleDeleteCategory = (catName) => {
+    setCustomCategories((prev) => prev.filter((c) => c !== catName));
+    setCategoryVideos((prev) => {
+      const updated = { ...prev };
+      delete updated[catName];
+      return updated;
+    });
+    if (selectedCategory === catName) {
+      setSelectedCategory(searchCategoryLabel);
+    }
+  };
+
+  // Reorder custom categories after drag-and-drop
+  const handleReorderCustomCategories = (newOrder) => {
+    setCustomCategories(newOrder);
+  };
+
+  // User clicked "+ Add to Category" on a video card
   const handleRequestAddToCategory = (video) => {
     setVideoToCategorize(video);
     setShowCategoryPicker(true);
   };
 
-  // user picked a custom category in the modal
+  // User picked a custom category in the modal
   const handleChooseCategory = (catName, video) => {
     setCategoryVideos((prev) => {
       const existing = prev[catName] || [];
@@ -117,27 +138,29 @@ function App() {
         [catName]: [...existing, video],
       };
     });
-
-    // if currently viewing that same category, append to "videos" grid
     if (selectedCategory === catName) {
       setVideos((prevGrid) => {
         if (prevGrid.some((v) => v.id === video.id)) return prevGrid;
         return [...prevGrid, video];
       });
     }
-
     setShowCategoryPicker(false);
     setVideoToCategorize(null);
   };
 
-  // reorder the customCategories array when the user drags
-  const handleReorderCustomCategories = (newOrder) => {
-    setCustomCategories(newOrder);
+  // Called when user presses Enter in the search input
+  const onSubmitSearch = () => {
+    setSelectedCategory(searchCategoryLabel);
   };
 
   return (
     <div className="app-container">
-      <Header />
+      <Header
+        searchQuery={searchQuery}
+        onChangeSearchQuery={setSearchQuery}
+        onSubmitSearch={onSubmitSearch}
+        onOpenSettings={() => setShowSettings(true)}
+      />
 
       <CategorySelector
         searchCategoryLabel={searchCategoryLabel}
@@ -145,6 +168,7 @@ function App() {
         selected={selectedCategory}
         onSelect={setSelectedCategory}
         onAddCustomCategory={handleAddCustomCategory}
+        onDeleteCategory={handleDeleteCategory}
         onReorderCustomCategories={handleReorderCustomCategories}
       />
 
@@ -162,6 +186,14 @@ function App() {
           onClose={() => setShowCategoryPicker(false)}
           onChooseCategory={handleChooseCategory}
           videoToCategorize={videoToCategorize}
+        />
+      )}
+
+      {showSettings && (
+        <Settings
+          accessibilityLevel={accessibilityLevel}
+          onChangeLevel={setAccessibilityLevel}
+          onClose={() => setShowSettings(false)}
         />
       )}
     </div>

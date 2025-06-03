@@ -24,33 +24,28 @@ function CategorySelector({
   selected,
   onSelect,
   onAddCustomCategory,
+  onDeleteCategory,
   onReorderCustomCategories,
 }) {
-  // set up DnD sensors (pointer/touch); small activation distance avoids accidental drags
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
     })
   );
 
-  // called by @dnd-kit when drag ends
   const handleDragEnd = (event) => {
     const { active, over } = event;
-    // if dropped outside any valid droppable, or same position, do nothing
     if (!over || active.id === over.id) {
       return;
     }
-    // find old & new index in customCategories
     const oldIndex = customCategories.indexOf(active.id);
     const newIndex = customCategories.indexOf(over.id);
-    // reorder the array and notify parent
     const newOrder = arrayMove(customCategories, oldIndex, newIndex);
     onReorderCustomCategories(newOrder);
   };
 
   return (
     <div className="category-selector">
-      {/*static “Discover” button*/}
       <button
         key="__SEARCH__"
         className={`category-button ${
@@ -61,7 +56,6 @@ function CategorySelector({
         {searchCategoryLabel}
       </button>
 
-      {/*draggable custom categories*/}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -72,19 +66,25 @@ function CategorySelector({
           strategy={horizontalListSortingStrategy}
         >
           {customCategories.map((catName) => (
-            <SortableCategoryButton
-              key={catName}
-              id={catName}
-              selected={selected === catName}
-              onClick={() => onSelect(catName)}
-            >
-              {catName}
-            </SortableCategoryButton>
+            <div key={catName} className="category-item">
+              <SortableCategoryButton
+                id={catName}
+                selected={selected === catName}
+                onClick={() => onSelect(catName)}
+              >
+                {catName}
+              </SortableCategoryButton>
+              <button
+                className="delete-cat-button"
+                onClick={() => onDeleteCategory(catName)}
+              >
+                🗑
+              </button>
+            </div>
           ))}
         </SortableContext>
       </DndContext>
 
-      {/*"+" button*/}
       <button
         className="category-button add-category-button"
         onClick={onAddCustomCategory}
@@ -96,9 +96,6 @@ function CategorySelector({
 }
 
 export default CategorySelector;
-
-
-
 
 function SortableCategoryButton({ id, selected, onClick, children }) {
   const {

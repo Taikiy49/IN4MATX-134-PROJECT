@@ -52,3 +52,19 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 100; /* ensure it sits above other buttons while dragging */
 }
+
+
+.category-item {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.delete-cat-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 4px;
+  font-size: 0.9rem;
+  color: salmon;
+}
