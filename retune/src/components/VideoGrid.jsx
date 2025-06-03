@@ -1,20 +1,19 @@
-// VideoGrid.jsx
 import React from 'react';
 import './VideoGrid.css';
 
 function getCategoryIcon(category) {
   switch (category) {
-    case 'Gaming': return '🎮';
+    case 'Gaming':    return '🎮';
     case 'Education': return '📚';
-    case 'Music': return '🎵';
-    case 'Travel': return '🌍';
-    case 'News': return '📰';
-    case 'Sports': return '🏅';
-    default: return '🎬';
+    case 'Music':     return '🎵';
+    case 'Travel':    return '🌍';
+    case 'News':      return '📰';
+    case 'Sports':    return '🏅';
+    default:          return '🎬';
   }
 }
 
-function VideoGrid({ videos, onAddToPlaylist }) {
+function VideoGrid({ videos, onRequestAddToCategory }) {
   return (
     <div className="video-grid">
       {videos.map((video, index) => (
@@ -27,10 +26,17 @@ function VideoGrid({ videos, onAddToPlaylist }) {
             />
           )}
           <div className="video-card-title">
-            <span className="video-icon">{getCategoryIcon(video.category)}</span>
+            <span className="video-icon">
+              {getCategoryIcon(video.category)}
+            </span>
             <span className="video-title-text">{video.title}</span>
           </div>
-          <button className="add-button" onClick={() => onAddToPlaylist(video)}>+ Add to Playlist</button>
+          <button
+            className="add-button"
+            onClick={() => onRequestAddToCategory(video)}
+          >
+            + Add to Category
+          </button>
         </div>
       ))}
     </div>
