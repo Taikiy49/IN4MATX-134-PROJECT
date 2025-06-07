@@ -17,26 +17,23 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // for accessibility slider
+  // accessibility slider state
   const [showSettings, setShowSettings] = useState(false);
   const [accessibilityLevel, setAccessibilityLevel] = useState(1);
 
-  // for search input
+  // search input state
   const [searchQuery, setSearchQuery] = useState('');
 
-  // for "Add to Category" modal
+  // "Add to Category" modal state
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [videoToCategorize, setVideoToCategorize] = useState(null);
 
-  // Whenever accessibilityLevel changes, adjust root font size
+  // Whenever accessibilityLevel changes, adjust document zoom
   useEffect(() => {
-    document.documentElement.style.setProperty(
-      '--base-font-size',
-      `${16 * accessibilityLevel}px`
-    );
+    document.documentElement.style.zoom = accessibilityLevel;
   }, [accessibilityLevel]);
 
-  // Build YouTube search URL (used when selectedCategory === "Discover")
+  // Build YouTube search URL based on searchQuery
   const buildYouTubeURL = () => {
     const baseURL = 'https://www.googleapis.com/youtube/v3/search';
     const key = process.env.REACT_APP_YOUTUBE_API_KEY;
@@ -51,7 +48,7 @@ function App() {
     return `${baseURL}?${params.toString()}`;
   };
 
-  // Fetch videos or load saved category videos whenever selectedCategory or searchQuery changes
+  // Fetch or load videos when selection or search changes
   useEffect(() => {
     if (selectedCategory === searchCategoryLabel) {
       const fetchVideos = async () => {
@@ -80,8 +77,7 @@ function App() {
       };
       fetchVideos();
     } else if (customCategories.includes(selectedCategory)) {
-      const saved = categoryVideos[selectedCategory] || [];
-      setVideos(saved);
+      setVideos(categoryVideos[selectedCategory] || []);
     } else {
       setVideos([]);
     }
@@ -96,10 +92,7 @@ function App() {
       return;
     }
     setCustomCategories((prev) => [...prev, newName]);
-    setCategoryVideos((prev) => ({
-      ...prev,
-      [newName]: [],
-    }));
+    setCategoryVideos((prev) => ({ ...prev, [newName]: [] }));
   };
 
   // Delete an existing custom category
@@ -126,24 +119,17 @@ function App() {
     setShowCategoryPicker(true);
   };
 
-  // User picked a custom category in the modal
+  // **UPDATED:** Add the video, switch to that category, and close the modal
   const handleChooseCategory = (catName, video) => {
     setCategoryVideos((prev) => {
       const existing = prev[catName] || [];
-      if (existing.some((v) => v.id === video.id)) {
-        return prev;
-      }
-      return {
-        ...prev,
-        [catName]: [...existing, video],
-      };
+      if (existing.some((v) => v.id === video.id)) return prev;
+      return { ...prev, [catName]: [...existing, video] };
     });
-    if (selectedCategory === catName) {
-      setVideos((prevGrid) => {
-        if (prevGrid.some((v) => v.id === video.id)) return prevGrid;
-        return [...prevGrid, video];
-      });
-    }
+
+    // immediately switch to the new category tab
+    setSelectedCategory(catName);
+
     setShowCategoryPicker(false);
     setVideoToCategorize(null);
   };
